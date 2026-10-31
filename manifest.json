@@ -1,0 +1,49 @@
+{
+  "id": "./?pwa=biblia-cronologica-365",
+  "name": "A Bíblia Cronológica em 365 Dias (12 Fases)",
+  "short_name": "Bíblia 365",
+  "description": "Plano de leitura cronológica da Bíblia em 365 dias e 12 fases flexíveis (1.189 capítulos) com marcação de conclusão, data e modo offline.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "any",
+  "background_color": "#064e3b",
+  "theme_color": "#064e3b",
+  "categories": [
+    "education",
+    "books",
+    "reference"
+  ],
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

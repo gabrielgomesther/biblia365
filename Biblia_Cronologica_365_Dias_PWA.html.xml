@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bíblia Cronológica 365">
+<title>A Bíblia Cronológica em 365 Dias (12 Fases) — PWA</title>
+<link rel="manifest" id="pwa-manifest-link" href="data:application/manifest+json;utf8,%7B%22name%22%3A%22A%20B%C3%ADblia%20Cronol%C3%B3gica%20em%20365%20Dias%20(12%20Fases)%22%2C%22short_name%22%3A%22B%C3%ADblia%20365%22%2C%22display%22%3A%22standalone%22%2C%22start_url%22%3A%22.%22%2C%22background_color%22%3A%22%23f8fafc%22%2C%22theme_color%22%3A%22%230f172a%22%7D">
+<style>
+  :root {
+    --bg-app: #f8fafc;
+    --bg-surface: #ffffff;
+    --bg-subtle: #f1f5f9;
+    --bg-done: #f0fdf4;
+    --bg-hero: #eff6ff;
+    --text-main: #0f172a;
+    --text-sec: #475569;
+    --text-muted: #64748b;
+    --accent: #1e40af;
+    --accent-soft: #eff6ff;
+    --accent-border: #bfdbfe;
+    --success: #059669;
+    --success-soft: #dcfce7;
+    --success-border: #86efac;
+    --gold: #d97706;
+    --danger: #dc2626;
+    --border: #e2e8f0;
+    --border-hover: #cbd5e1;
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --font-scale: 1;
+  }
+
+  [data-theme="dark"] {
+    --bg-app: #0b1120;
+    --bg-surface: #111827;
+    --bg-subtle: #1e293b;
+    --bg-done: #092218;
+    --bg-hero: #132238;
+    --text-main: #f8fafc;
+    --text-sec: #cbd5e1;
+    --text-muted: #94a3b8;
+    --accent: #60a5fa;
+    --accent-soft: #172554;
+    --accent-border: #1e3a8a;
+    --success: #34d399;
+    --success-soft: #064e3b;
+    --success-border: #047857;
+    --gold: #fbbf24;
+    --danger: #f87171;
+    --border: #1e293b;
+    --border-hover: #334155;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.4);
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-app);
+    color: var(--text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+    font-size: calc(15px * var(--font-scale));
+    line-height: 1.5;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 8px;
+    background: var(--accent);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    z-index: 9999;
+    font-weight: 600;
+  }
+  .skip-link:focus { left: 8px; }
+
+  /* Sticky Minimalist Header */
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    padding: 10px 16px;
+    backdrop-filter: blur(10px);
+  }
+
+  .header-top {
+    max-width: 980px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .brand-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .brand-badge {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.78rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .brand-title {
+    font-size: 0.96rem;
+    font-weight: 700;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .brand-subtitle {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .icon-btn {
+    background: var(--bg-subtle);
+    color: var(--text-main);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 5px 10px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 34px;
+    transition: background 0.15s ease;
+  }
+  .icon-btn:hover { background: var(--border); }
+
+  /* Progress Strip */
+  .progress-strip {
+    max-width: 980px;
+    margin: 8px auto 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .progress-stats-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .progress-track {
+    width: 100%;
+    height: 5px;
+    background: var(--bg-subtle);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--success);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+
+  /* Main Container */
+  .app-container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 16px 14px 96px 14px;
+  }
+
+  /* KPI Strip */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  @media (min-width: 680px) {
+    .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  .kpi-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 11px 14px;
+    box-shadow: var(--shadow-sm);
+  }
+  .kpi-label {
+    font-size: 0.69rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .kpi-val {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 2px 0;
+  }
+  .kpi-sub {
+    font-size: 0.72rem;
+    color: var(--text-sec);
+  }
+
+  /* Next Reading Spotlight Card */
+  .next-reading-card {
+    background: var(--bg-hero);
+    border: 1px solid var(--accent-border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    box-shadow: var(--shadow-sm);
+  }
+  .next-reading-info {
+    flex: 1 1 260px;
+    min-width: 0;
+  }
+  .next-tag {
+    display: inline-block;
+    font-size: 0.69rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--accent);
+    margin-bottom: 3px;
+  }
+  .next-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: var(--text-main);
+  }
+  .next-focus {
+    font-size: 0.81rem;
+    color: var(--text-sec);
+    margin: 0 0 8px 0;
+  }
+  .next-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* Guide Details Box */
+  .guide-details {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .guide-summary {
+    padding: 11px 14px;
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: var(--accent);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .guide-summary::-webkit-details-marker { display: none; }
+  .guide-body {
+    padding: 12px 14px 14px 14px;
+    border-top: 1px solid var(--border);
+    font-size: 0.81rem;
+    color: var(--text-sec);
+  }
+  .guide-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .guide-box {
+    background: var(--bg-subtle);
+    padding: 10px;
+    border-radius: var(--radius-sm);
+  }
+  .pub-link {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .pub-link:hover { text-decoration: underline; }
+
+  /* Filter & Search Controls */
+  .controls-bar {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .search-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .search-input, .select-filter {
+    min-height: 38px;
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-app);
+    color: var(--text-main);
+    font-size: 0.85rem;
+  }
+  .search-input { flex: 2 1 220px; }
+  .select-filter { flex: 1 1 180px; font-weight: 500; }
+  .search-input:focus, .select-filter:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .filter-chips {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .filter-chips::-webkit-scrollbar { display: none; }
+
+  .chip-btn {
+    background: var(--bg-subtle);
+    color: var(--text-sec);
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    min-height: 31px;
+    transition: all 0.15s ease;
+  }
+  .chip-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* Phase Accordion Card */
+  .phase-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-bottom: 10px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .phase-header-btn {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    color: var(--text-main);
+    border: none;
+    padding: 13px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .phase-header-btn:hover { background: var(--bg-subtle); }
+
+  .phase-title-block {
+    min-width: 0;
+    flex: 1;
+  }
+  .phase-title-text {
+    font-size: 0.94rem;
+    font-weight: 700;
+    margin: 0 0 2px 0;
+    color: var(--text-main);
+  }
+  .phase-sub-text {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .phase-meta-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .phase-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--bg-subtle);
+    color: var(--text-sec);
+  }
+  .phase-badge.done {
+    background: var(--success-soft);
+    color: var(--success);
+  }
+
+  .phase-body {
+    border-top: 1px solid var(--border);
+    display: none;
+  }
+  .phase-card.open .phase-body { display: block; }
+
+  /* Minimalist Day Row */
+  .day-row {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s ease;
+  }
+  .day-row:last-child { border-bottom: none; }
+  .day-row.done {
+    background: var(--bg-done);
+  }
+
+  .day-main-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .day-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    flex: 1 1 260px;
+    min-width: 0;
+  }
+
+  .day-check {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    accent-color: var(--success);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .day-num-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: var(--bg-subtle);
+    padding: 2px 7px;
+    border-radius: 6px;
+    white-space: nowrap;
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
+  .day-row.done .day-num-badge {
+    background: var(--success-soft);
+    color: var(--success);
+  }
+
+  .day-content-col {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .verse-pills-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 3px;
+  }
+
+  .verse-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid var(--accent-border);
+    border-radius: 999px;
+    padding: 2px 9px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .verse-pill:hover { text-decoration: underline; }
+
+  .day-focus-text {
+    font-size: 0.81rem;
+    color: var(--text-sec);
+    margin: 0;
+  }
+
+  /* Right Controls: Date Input + Note Button */
+  .day-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .date-label-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.71rem;
+    color: var(--text-muted);
+  }
+
+  .day-date-input {
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    color: var(--text-main);
+    border-radius: 6px;
+    padding: 4px 7px;
+    font-size: 0.75rem;
+    font-family: inherit;
+    min-height: 30px;
+  }
+  .day-row.done .day-date-input {
+    border-color: var(--success-border);
+  }
+
+  .gem-toggle-btn {
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    color: var(--text-muted);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 30px;
+  }
+  .gem-toggle-btn.has-gem {
+    color: var(--gold);
+    border-color: var(--gold);
+    background: var(--bg-subtle);
+  }
+
+  .day-gem-drawer {
+    margin-top: 8px;
+    padding-left: 30px;
+    display: none;
+  }
+  .day-gem-drawer.open { display: block; }
+
+  .gem-input {
+    width: 100%;
+    min-height: 48px;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 0.82rem;
+    resize: vertical;
+  }
+  .gem-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  /* Bottom Navigation */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 110;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px)) 6px;
+    backdrop-filter: blur(10px);
+  }
+  .nav-tab {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    padding: 6px 4px;
+    font-size: 0.71rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    border-radius: var(--radius-sm);
+  }
+  .nav-tab.active {
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .nav-tab-icon { font-size: 1.05rem; line-height: 1; }
+
+  .view-section { display: none; }
+  .view-section.active { display: block; }
+
+  .panel-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-sm);
+  }
+  .panel-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+  }
+
+  .btn-primary, .btn-secondary, .btn-danger {
+    border-radius: var(--radius-sm);
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid transparent;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-secondary { background: var(--bg-subtle); color: var(--text-main); border-color: var(--border); }
+  .btn-danger { background: var(--danger); color: #fff; }
+
+  .history-entry {
+    background: var(--bg-app);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+  .history-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-bottom: 3px;
+  }
+
+  .toast-msg {
+    position: fixed;
+    bottom: 74px;
+    right: 16px;
+    z-index: 200;
+    background: var(--text-main);
+    color: var(--bg-surface);
+    padding: 9px 14px;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md);
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: none;
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    z-index: 300;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-card {
+    background: var(--bg-surface);
+    color: var(--text-main);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    max-width: 420px;
+    width: 100%;
+    padding: 18px;
+    box-shadow: var(--shadow-md);
+  }
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+
+<header class="app-header">
+  <div class="header-top">
+    <div class="brand-title-wrap">
+      <div class="brand-badge" aria-hidden="true">365</div>
+      <div>
+        <h1 class="brand-title">A Bíblia Cronológica em 365 Dias</h1>
+        <p class="brand-subtitle">12 Fases Progressivas • 1.189 Capítulos na Ordem Histórica</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="icon-btn" id="btn-font-dec" title="Diminuir fonte" aria-label="Diminuir fonte">A-</button>
+      <button type="button" class="icon-btn" id="btn-font-inc" title="Aumentar fonte" aria-label="Aumentar fonte">A+</button>
+      <button type="button" class="icon-btn" id="btn-theme-toggle" title="Alternar tema claro/escuro" aria-label="Alternar tema">🌓</button>
+    </div>
+  </div>
+  <div class="progress-strip">
+    <div class="progress-stats-row">
+      <span id="hdr-prog-text">Progresso: 0% (0/365 dias concluídos)</span>
+      <span id="hdr-chap-text">0 / 1.189 capítulos lidos • 0/12 Fases</span>
+    </div>
+    <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="hdr-prog-bar-wrap">
+      <div class="progress-fill" id="hdr-prog-fill"></div>
+    </div>
+  </div>
+</header>
+
+<main id="main-content" class="app-container">
+
+  <!-- VIEW 1: PLANO DE LEITURA (12 FASES / 365 DIAS) -->
+  <section id="view-leitura" class="view-section active" aria-label="Plano de Leitura em 12 Fases">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Dias Concluídos</div>
+        <div class="kpi-val" id="kpi-days">0 / 365</div>
+        <div class="kpi-sub" id="kpi-pct-sub">Restam 365 dias</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Capítulos Lidos</div>
+        <div class="kpi-val" id="kpi-chapters">0 / 1.189</div>
+        <div class="kpi-sub">Ordem histórica da TNM</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Fases Completas</div>
+        <div class="kpi-val" id="kpi-phases">0 / 12</div>
+        <div class="kpi-sub">Sem meses fixos</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Última Conclusão</div>
+        <div class="kpi-val" id="kpi-last-date" style="font-size:1rem;">—</div>
+        <div class="kpi-sub" id="kpi-last-day">Nenhum dia marcado</div>
+      </div>
+    </div>
+
+    <!-- Spotlight Card for Next Unread Day -->
+    <div id="next-reading-mount"></div>
+
+    <!-- Collapsible Guide from Pages 2 & 3 of the PDF -->
+    <details class="guide-details">
+      <summary class="guide-summary">
+        <span>🧭 Sobre Este Guia: A Harmonia Cronológica e Publicações de Apoio</span>
+        <span style="font-size:0.75rem; color:var(--text-muted);">Ver detalhes ▾</span>
+      </summary>
+      <div class="guide-body">
+        <p style="margin:0 0 8px 0;">
+          Em vez de ler os 66 livros de forma isolada, este plano harmoniza todos os <strong>1.189 capítulos da Tradução do Novo Mundo</strong> na ordem histórica dos acontecimentos, divididos em <strong>12 Fases flexíveis</strong> (sem meses fixos):
+        </p>
+        <div class="guide-grid">
+          <div class="guide-box">
+            <strong>• Os Patriarcas e Jó (Fase 1):</strong> O livro de Jó é lido durante o período em que Israel estava no Egito, após a morte de José e antes do chamado de Moisés.<br>
+            <strong>• Davi e os Salmos (Fases 4–6):</strong> Os relatos de 1 e 2 Samuel e 1 Crônicas são entrelaçados com os Salmos nos momentos exatos em que Davi os compôs.
+          </div>
+          <div class="guide-box">
+            <strong>• Reis e Profetas (Fases 7–10):</strong> Os profetas maiores e menores são lidos durante os reinados em que pregaram e no exílio em Babilônia.<br>
+            <strong>• Evangelhos, Atos e Epístolas (Fases 10–12):</strong> Os 4 Evangelhos formam uma narrativa unificada (Fase 10–11) e as cartas apostólicas são lidas nos momentos exatos de Atos (Fases 11–12).
+          </div>
+          <div class="guide-box">
+            <strong>📚 Publicações Recomendadas (WOL / JW.ORG):</strong><br>
+            • <a href="https://www.jw.org/pt/biblioteca/livros/Estudo-Perspicaz-das-Escrituras/" target="_blank" rel="noopener noreferrer" class="pub-link">Estudo Perspicaz das Escrituras ↗</a><br>
+            • <a href="https://www.jw.org/pt/biblioteca/livros/jesus-o-caminho/" target="_blank" rel="noopener noreferrer" class="pub-link">Jesus — O Caminho, a Verdade e a Vida (Fase 10) ↗</a><br>
+            • <a href="https://wol.jw.org/pt/wol/s/r5/lp-t?q=Testemunho+Cabal+Reino" target="_blank" rel="noopener noreferrer" class="pub-link">Dê Testemunho Cabal sobre o Reino (Fase 11) ↗</a><br>
+            • <a href="https://www.jw.org/pt/biblioteca/livros/adoracao-pura/" target="_blank" rel="noopener noreferrer" class="pub-link">Adoração Pura de Jeová (Ezequiel — Fase 9/10) ↗</a><br>
+            • <a href="https://wol.jw.org/pt/wol/s/r5/lp-t?q=Profecia+de+Daniel" target="_blank" rel="noopener noreferrer" class="pub-link">Preste Atenção à Profecia de Daniel! (Fase 10) ↗</a><br>
+            • <a href="https://wol.jw.org/pt/wol/s/r5/lp-t?q=Cl%C3%ADmax+de+Revela%C3%A7%C3%A3o" target="_blank" rel="noopener noreferrer" class="pub-link">Apocalipse — Seu Grandioso Clímax! (Fase 12) ↗</a>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <div class="controls-bar">
+      <div class="search-row">
+        <input type="search" id="search-input" class="search-input" placeholder="Buscar por dia, livro bíblico, capítulo ou foco histórico..." aria-label="Buscar no plano de leitura">
+        <select id="phase-select" class="select-filter" aria-label="Filtrar por Fase">
+          <option value="all">Todas as 12 Fases (365 Dias)</option>
+        </select>
+      </div>
+      <div class="filter-chips" role="group" aria-label="Filtros rápidos">
+        <button type="button" class="chip-btn active" data-filter="all">Todos os Dias (365)</button>
+        <button type="button" class="chip-btn" data-filter="pending">Pendentes</button>
+        <button type="button" class="chip-btn" data-filter="completed">Concluídos ✓</button>
+        <button type="button" class="chip-btn" data-filter="with_gem">Com Gema Anotada 💎</button>
+        <button type="button" class="chip-btn" id="btn-expand-all">Expandir 12 Fases</button>
+        <button type="button" class="chip-btn" id="btn-collapse-all">Recolher Tudo</button>
+      </div>
+    </div>
+
+    <div id="phases-mount"></div>
+  </section>
+
+  <!-- VIEW 2: HISTÓRICO DE DATAS E GEMAS ESPIRITUAIS -->
+  <section id="view-historico" class="view-section" aria-label="Histórico de Leitura e Gemas">
+    <div class="panel-card">
+      <h2 class="panel-title">📅 Diário de Leituras Concluídas e Gemas Espirituais</h2>
+      <p style="font-size:0.83rem; color:var(--text-sec); margin-top:0;">
+        Acompanhe todos os dias já lidos com suas respectivas datas de conclusão e as gemas espirituais que você anotou.
+      </p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
+        <button type="button" class="btn-primary" id="btn-export-txt">📥 Baixar Relatório de Leitura (.TXT)</button>
+        <button type="button" class="btn-secondary" id="btn-export-md">📄 Baixar Diário em Markdown (.MD)</button>
+      </div>
+      <div id="history-mount"></div>
+    </div>
+  </section>
+
+  <!-- VIEW 3: BACKUP E INSTALAÇÃO OFFLINE -->
+  <section id="view-backup" class="view-section" aria-label="Backup e Instalação Offline">
+    <div class="panel-card">
+      <h2 class="panel-title">⚙️ Backup Local e Instalação no Celular</h2>
+      <p style="font-size:0.84rem; color:var(--text-sec); margin-top:0;">
+        Este aplicativo funciona <strong>100% offline</strong>. Suas marcações de leitura, datas de conclusão e gemas ficam salvas na memória do aparelho (<code>localStorage</code>).
+      </p>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px; margin-bottom:16px;">
+        <div class="history-entry">
+          <h3 style="font-size:0.88rem; margin:0 0 6px 0;">1. Exportar Backup (.JSON)</h3>
+          <p style="font-size:0.78rem; color:var(--text-sec); margin:0 0 10px 0;">Salva todos os checks, datas de conclusão e notas em um arquivo de segurança.</p>
+          <button type="button" class="btn-primary" id="btn-backup-json">📦 Baixar Backup (.JSON)</button>
+        </div>
+        <div class="history-entry">
+          <h3 style="font-size:0.88rem; margin:0 0 6px 0;">2. Restaurar Backup (.JSON)</h3>
+          <p style="font-size:0.78rem; color:var(--text-sec); margin:0 0 10px 0;">Importe um arquivo <code>.json</code> salvo anteriormente para restaurar seu histórico.</p>
+          <input type="file" id="input-restore-json" accept=".json,application/json" style="font-size:0.78rem; max-width:100%;">
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--border); padding-top:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <span style="font-size:0.78rem; color:var(--text-muted);">Deseja zerar o plano para iniciar uma nova jornada de leitura?</span>
+        <button type="button" class="btn-danger" id="btn-reset-all">🗑️ Reiniciar Plano do Zero</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<nav class="bottom-nav" aria-label="Navegação Principal">
+  <button type="button" class="nav-tab active" data-view="view-leitura" id="tab-leitura">
+    <span class="nav-tab-icon" aria-hidden="true">📖</span>
+    <span>Plano (12 Fases)</span>
+  </button>
+  <button type="button" class="nav-tab" data-view="view-historico" id="tab-historico">
+    <span class="nav-tab-icon" aria-hidden="true">📅</span>
+    <span>Histórico e Gemas</span>
+  </button>
+  <button type="button" class="nav-tab" data-view="view-backup" id="tab-backup">
+    <span class="nav-tab-icon" aria-hidden="true">⚙️</span>
+    <span>Backup Offline</span>
+  </button>
+</nav>
+
+<div id="toast-msg" class="toast-msg" role="status" aria-live="polite"></div>
+
+<div id="confirm-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-card">
+    <h3 id="modal-title" style="margin:0 0 8px 0; font-size:0.96rem;">Confirmar Ação</h3>
+    <p id="modal-desc" style="margin:0 0 16px 0; font-size:0.84rem; color:var(--text-sec);"></p>
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button type="button" class="btn-secondary" id="modal-cancel-btn">Cancelar</button>
+      <button type="button" class="btn-danger" id="modal-confirm-btn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PHASES_DATA = [{"phase_num": 1, "title": "Fase 1 — Da Criação aos Patriarcas", "subtitle": "Dias 1 a 30 • Gênesis 1–50, Jó 1–42 e Êxodo 1–3", "start_day": 1, "end_day": 30, "days": [{"d": 1, "r": "Gênesis 1–3", "f": "A criação dos céus, da terra e do homem", "c": 3}, {"d": 2, "r": "Gênesis 4–6", "f": "Caim e Abel; a linhagem de Sete até Noé", "c": 3}, {"d": 3, "r": "Gênesis 7–9", "f": "Noé, o Dilúvio e o pacto do arco-íris", "c": 3}, {"d": 4, "r": "Gênesis 10–11", "f": "A T ábua das Nações e a T orre de Babel", "c": 2}, {"d": 5, "r": "Gênesis 12–14", "f": "Abrão chamado por Jeová; a promessa da descendência", "c": 3}, {"d": 6, "r": "Gênesis 15–17", "f": "O pacto com Abraão e a circuncisão como sinal", "c": 3}, {"d": 7, "r": "Gênesis 18–20", "f": "Sodoma e Gomorra; a intercessão de Abraão", "c": 3}, {"d": 8, "r": "Gênesis 21–23", "f": "O nascimento de Isaque e a grande prova no Moriá", "c": 3}, {"d": 9, "r": "Gênesis 24–27", "f": "Rebeca; a morte de Abraão; Esaú vende a primogenitura", "c": 4}, {"d": 10, "r": "Gênesis 28–30", "f": "A escada até o céu; Jacó, Lia e Raquel em Harã", "c": 3}, {"d": 11, "r": "Gênesis 31–33", "f": "Jacó deixa Labão e se reconcilia com Esaú", "c": 3}, {"d": 12, "r": "Gênesis 34–36", "f": "Diná; a volta a Betel; a morte de Raquel e de Isaque", "c": 3}, {"d": 13, "r": "Gênesis 37–39", "f": "José vendido pelos irmãos; sua integridade no Egito", "c": 3}, {"d": 14, "r": "Gênesis 40–41", "f": "Os sonhos interpretados; José governa o Egito", "c": 2}, {"d": 15, "r": "Gênesis 42–44", "f": "Os irmãos de José descem ao Egito", "c": 3}, {"d": 16, "r": "Gênesis 45–47", "f": "José se revela; Jacó e sua família mudam-se ao Egito", "c": 3}, {"d": 17, "r": "Gênesis 48–50", "f": "As bênçãos proféticas de Jacó; a morte de José", "c": 3}, {"d": 18, "r": "Jó 1–3", "f": "A integridade de Jó desafiada por Satanás", "c": 3}, {"d": 19, "r": "Jó 4–7", "f": "Elifaz acusa; Jó defende sua integridade", "c": 4}, {"d": 20, "r": "Jó 8–10", "f": "Bildade fala; Jó anseia por um mediador", "c": 3}, {"d": 21, "r": "Jó 11–14", "f": "Zofar acusa; 'Se um homem morrer, poderá viver de novo?'", "c": 4}, {"d": 22, "r": "Jó 15–18", "f": "O segundo ciclo de debates: acusações mais duras", "c": 4}, {"d": 23, "r": "Jó 19–21", "f": "'Eu sei que o meu resgatador vive' (Jó 19:25)", "c": 3}, {"d": 24, "r": "Jó 22–25", "f": "O terceiro ciclo: Elifaz e Bildade insistem no erro", "c": 4}, {"d": 25, "r": "Jó 26–29", "f": "Jó relembra sua vida de temor a Deus", "c": 4}, {"d": 26, "r": "Jó 30–32", "f": "A defesa final de Jó; o jovem Eliú se apresenta", "c": 3}, {"d": 27, "r": "Jó 33–35", "f": "Eliú corrige a todos e defende a justiça de Deus", "c": 3}, {"d": 28, "r": "Jó 36–39", "f": "Eliú exalta a grandeza do Criador", "c": 4}, {"d": 29, "r": "Jó 40–42", "f": "Jó se retrata; Jeová o abençoa em dobro", "c": 3}, {"d": 30, "r": "Êxodo 1–3", "f": "Israel escravizado; Moisés e a sarça ardente", "c": 3}]}, {"phase_num": 2, "title": "Fase 2 — Jó e o Êxodo", "subtitle": "Dias 31 a 60 • Êxodo 4–40, Levítico 1–27, Números 1–26 e Salmos 90, 95", "start_day": 31, "end_day": 60, "days": [{"d": 31, "r": "Êxodo 4–6", "f": "Moisés e Arão diante de Faraó; Jeová revela seu nome", "c": 3}, {"d": 32, "r": "Êxodo 7–9", "f": "As primeiras pragas humilham os deuses do Egito", "c": 3}, {"d": 33, "r": "Êxodo 10–12", "f": "As últimas pragas e a instituição da Páscoa", "c": 3}, {"d": 34, "r": "Êxodo 13–15", "f": "A travessia do Mar Vermelho e o cântico de vitória", "c": 3}, {"d": 35, "r": "Êxodo 16–18", "f": "O maná, a água da rocha e o conselho de Jetro", "c": 3}, {"d": 36, "r": "Êxodo 19–21", "f": "O pacto da Lei e os Dez Mandamentos no Sinai", "c": 3}, {"d": 37, "r": "Êxodo 22–24", "f": "As leis do pacto ratificadas com sangue", "c": 3}, {"d": 38, "r": "Êxodo 25–27", "f": "As instruções para o tabernáculo", "c": 3}, {"d": 39, "r": "Êxodo 28–29", "f": "As vestes e a investidura do sacerdócio", "c": 2}, {"d": 40, "r": "Êxodo 30–32", "f": "O incenso sagrado; o pecado do bezerro de ouro", "c": 3}, {"d": 41, "r": "Êxodo 33–35", "f": "Jeová proclama seus atributos; o povo contribui", "c": 3}, {"d": 42, "r": "Êxodo 36–38", "f": "A construção do tabernáculo pelos artesãos", "c": 3}, {"d": 43, "r": "Êxodo 39–40 • Salmos 90", "f": "O tabernáculo erguido; a nuvem da glória de Jeová — lido com o(s) Salmo(s) 90", "c": 3}, {"d": 44, "r": "Levítico 1–3", "f": "As ofertas queimadas, de cereais e de participação", "c": 3}, {"d": 45, "r": "Levítico 4–6", "f": "As ofertas pelo pecado e pela culpa", "c": 3}, {"d": 46, "r": "Levítico 7–8", "f": "A empossadura de Arão e seus filhos", "c": 2}, {"d": 47, "r": "Levítico 9–11", "f": "Fogo de Jeová; Nadabe e Abiú; leis sobre alimentos", "c": 3}, {"d": 48, "r": "Levítico 12–15", "f": "Leis de purificação e diagnóstico de lepra", "c": 4}, {"d": 49, "r": "Levítico 16–18", "f": "O Dia da Expiação e a santidade do sangue", "c": 3}, {"d": 50, "r": "Levítico 19–21", "f": "'Sejam santos, porque eu, Jeová, sou santo'", "c": 3}, {"d": 51, "r": "Levítico 22–25", "f": "As festividades sagradas anuais de Israel", "c": 4}, {"d": 52, "r": "Levítico 26–27 • Números 1–2", "f": "Bênçãos pela obediência; maldições pela rebeldia", "c": 4}, {"d": 53, "r": "Números 3–6", "f": "Os levitas designados ao serviço do tabernáculo", "c": 4}, {"d": 54, "r": "Números 7–10", "f": "As ofertas dos 12 maiorais na inauguração do altar", "c": 4}, {"d": 55, "r": "Números 11–13", "f": "As queixas do povo; os 12 espiões em Canaã", "c": 3}, {"d": 56, "r": "Números 14–15 • Salmos 95", "f": "A falta de fé condena a geração a 40 anos no deserto — lido com o(s) Salmo(s) 95", "c": 3}, {"d": 57, "r": "Números 16–18", "f": "A rebelião de Corá; o bastão de Arão floresce", "c": 3}, {"d": 58, "r": "Números 19–21", "f": "A vaca vermelha; a serpente de cobre", "c": 3}, {"d": 59, "r": "Números 22–24", "f": "Balaão é impedido de amaldiçoar Israel", "c": 3}, {"d": 60, "r": "Números 25–26", "f": "O pecado com Baal de Peor; o segundo censo", "c": 2}]}, {"phase_num": 3, "title": "Fase 3 — A Lei e o Deserto", "subtitle": "Dias 61 a 90 • Números 27–36, Deuteronômio 1–34, Josué 1–24 e Juízes 1–21", "start_day": 61, "end_day": 90, "days": [{"d": 61, "r": "Números 27–29", "f": "As filhas de Zelofeade; Josué designado sucessor", "c": 3}, {"d": 62, "r": "Números 30–33", "f": "Votos das mulheres; vitória sobre Midiã", "c": 4}, {"d": 63, "r": "Números 34–36", "f": "Os limites de Canaã e as cidades de refúgio", "c": 3}, {"d": 64, "r": "Deuteronômio 1–4", "f": "Moisés recapitula a jornada desde Horebe", "c": 4}, {"d": 65, "r": "Deuteronômio 5–7", "f": "'Ame a Jeová de todo o coração' (o Shemá)", "c": 3}, {"d": 66, "r": "Deuteronômio 8–10", "f": "'O homem não vive somente de pão'", "c": 3}, {"d": 67, "r": "Deuteronômio 11–13", "f": "Um só lugar de adoração; alerta contra a apostasia", "c": 3}, {"d": 68, "r": "Deuteronômio 14–16", "f": "O dízimo, o ano de remissão e as festividades", "c": 3}, {"d": 69, "r": "Deuteronômio 17–19", "f": "O futuro rei; o profeta semelhante a Moisés", "c": 3}, {"d": 70, "r": "Deuteronômio 20–22", "f": "Leis de guerra e de compaixão ao próximo", "c": 3}, {"d": 71, "r": "Deuteronômio 23–25", "f": "Leis sobre a congregação e a justiça social", "c": 3}, {"d": 72, "r": "Deuteronômio 26–28", "f": "As primícias e o pacto renovado em Moabe", "c": 3}, {"d": 73, "r": "Deuteronômio 29–31", "f": "'Escolha a vida'; Josué comissionado", "c": 3}, {"d": 74, "r": "Deuteronômio 32–34", "f": "O cântico de Moisés; sua bênção e morte no monte Nebo", "c": 3}, {"d": 75, "r": "Josué 1–3", "f": "'Seja corajoso e forte'; Raabe e a travessia do Jordão", "c": 3}, {"d": 76, "r": "Josué 4–6", "f": "As 12 pedras memoriais e a queda de Jericó", "c": 3}, {"d": 77, "r": "Josué 7–10", "f": "O pecado de Acã; a vitória em Ai", "c": 4}, {"d": 78, "r": "Josué 11–13", "f": "A conquista do norte; a terra ainda por possuir", "c": 3}, {"d": 79, "r": "Josué 14–15", "f": "Calebe pede sua montanha; a herança de Judá", "c": 2}, {"d": 80, "r": "Josué 16–18", "f": "As heranças de Efraim, Manassés e Benjamim", "c": 3}, {"d": 81, "r": "Josué 19–21", "f": "As cidades de refúgio e as cidades dos levitas", "c": 3}, {"d": 82, "r": "Josué 22–24", "f": "'Quanto a mim e à minha casa, serviremos a Jeová'", "c": 3}, {"d": 83, "r": "Juízes 1–3", "f": "O ciclo de apostasia começa; Otniel, Eúde e Sangar", "c": 3}, {"d": 84, "r": "Juízes 4–5", "f": "Débora, Baraque e o cântico de vitória sobre Sísera", "c": 2}, {"d": 85, "r": "Juízes 6–8", "f": "Gideão e os 300 libertam Israel de Midiã", "c": 3}, {"d": 86, "r": "Juízes 9–10", "f": "Abimeleque: o preço amargo da ambição", "c": 2}, {"d": 87, "r": "Juízes 11–13", "f": "O voto de Jefté; o nascimento de Sansão", "c": 3}, {"d": 88, "r": "Juízes 14–16", "f": "Sansão contra os filisteus; sua força final", "c": 3}, {"d": 89, "r": "Juízes 17–19", "f": "Mica e os danitas: a idolatria se espalha", "c": 3}, {"d": 90, "r": "Juízes 20–21", "f": "A guerra contra Benjamim", "c": 2}]}, {"phase_num": 4, "title": "Fase 4 — A Conquista e os Juízes", "subtitle": "Dias 91 a 120 • Rute, 1 Samuel, 1 Crônicas 1–20, 2 Samuel 1–14 e Salmos", "start_day": 91, "end_day": 120, "days": [{"d": 91, "r": "Rute 1–4", "f": "A lealdade de Rute recompensada: bisavó de Davi", "c": 4}, {"d": 92, "r": "1 Samuel 1–3", "f": "A oração de Ana; Jeová chama o menino Samuel", "c": 3}, {"d": 93, "r": "1 Samuel 4–6", "f": "A Arca capturada; Dagom cai diante de Jeová", "c": 3}, {"d": 94, "r": "1 Samuel 7–9", "f": "Israel pede um rei; Saul é apresentado", "c": 3}, {"d": 95, "r": "1 Samuel 10–12", "f": "Saul ungido rei; a despedida de Samuel", "c": 3}, {"d": 96, "r": "1 Samuel 13–16", "f": "A precipitação de Saul; a bravura de Jônatas", "c": 4}, {"d": 97, "r": "1 Samuel 17 • Salmos 23", "f": "Davi derruba Golias em nome de Jeová dos exércitos — com o(s) Salmo(s) 23 composto(s) nessa ocasião", "c": 2}, {"d": 98, "r": "1 Samuel 18–19 • Salmos 59", "f": "A amizade de Jônatas; a inveja assassina de Saul — com o(s) Salmo(s) 59 composto(s) nessa ocasião", "c": 3}, {"d": 99, "r": "1 Samuel 20–21 • Salmos 34, 56", "f": "A despedida de Jônatas; Davi foge para Gate — com o(s) Salmo(s) 34, 56 composto(s) nessa ocasião", "c": 4}, {"d": 100, "r": "1 Samuel 22 • Salmos 52, 57, 142", "f": "Davi na caverna de Adulão; a matança dos sacerdotes — com o(s) Salmo(s) 52, 57, 142 composto(s) nessa ocasião", "c": 4}, {"d": 101, "r": "1 Samuel 23 • Salmos 54, 63", "f": "Davi em Queila e no deserto de Zife — com o(s) Salmo(s) 54, 63 composto(s) nessa ocasião", "c": 3}, {"d": 102, "r": "1 Samuel 24–25 • Salmos 7", "f": "Davi poupa Saul; a prudência de Abigail — com o(s) Salmo(s) 7 composto(s) nessa ocasião", "c": 3}, {"d": 103, "r": "1 Samuel 26–28", "f": "Davi poupa Saul de novo; Saul consulta uma médium", "c": 3}, {"d": 104, "r": "1 Samuel 29–31 • 1 Crônicas 10", "f": "A morte de Saul e Jônatas no monte Gilboa", "c": 4}, {"d": 105, "r": "1 Crônicas 1–4", "f": "As genealogias: de Adão às tribos de Israel", "c": 4}, {"d": 106, "r": "1 Crônicas 5–6", "f": "As tribos do leste e a linhagem sacerdotal", "c": 2}, {"d": 107, "r": "1 Crônicas 7–9", "f": "As demais tribos e os repatriados de Jerusalém", "c": 3}, {"d": 108, "r": "2 Samuel 1–2 • Salmos 101", "f": "Davi lamenta Saul e Jônatas; rei em Hebrom — com o(s) Salmo(s) 101 composto(s) nessa ocasião", "c": 3}, {"d": 109, "r": "2 Samuel 3–4", "f": "A casa de Davi se fortalece; Abner e Isbosete mortos", "c": 2}, {"d": 110, "r": "2 Samuel 5 • 1 Crônicas 11–12", "f": "Davi rei sobre todo o Israel; Jerusalém conquistada", "c": 3}, {"d": 111, "r": "2 Samuel 6 • 1 Crônicas 13–14", "f": "A Arca levada a Jerusalém; a alegria de Davi", "c": 3}, {"d": 112, "r": "1 Crônicas 15–16 • Salmos 96, 105", "f": "A Arca em Sião; o cântico de agradecimento de Davi — lido com o(s) Salmo(s) 96, 105", "c": 4}, {"d": 113, "r": "Salmos 1–2, 8, 15", "f": "Os dois caminhos; o Ungido de Jeová reinará", "c": 4}, {"d": 114, "r": "Salmos 19, 24, 29", "f": "A criação e a Lei revelam a glória de Jeová", "c": 3}, {"d": 115, "r": "2 Samuel 7 • 1 Crônicas 17 • Salmos 89", "f": "O pacto do Reino: um trono firme para sempre — com o(s) Salmo(s) 89 composto(s) nessa ocasião", "c": 3}, {"d": 116, "r": "2 Samuel 8 • 1 Crônicas 18 • Salmos 60", "f": "As vitórias de Davi expandem o reino — com o(s) Salmo(s) 60 composto(s) nessa ocasião", "c": 3}, {"d": 117, "r": "2 Samuel 9–10 • 1 Crônicas 19 • Salmos 20", "f": "A bondade leal de Davi com Mefibosete — com o(s) Salmo(s) 20 composto(s) nessa ocasião", "c": 4}, {"d": 118, "r": "2 Samuel 11–12 • Salmos 51", "f": "O pecado com Bate-Seba; 'Você é este homem!' — com o(s) Salmo(s) 51 composto(s) nessa ocasião", "c": 3}, {"d": 119, "r": "1 Crônicas 20 • Salmos 21, 32", "f": "A queda dos gigantes; o censo e a eira de Ornã — lido com o(s) Salmo(s) 21, 32", "c": 3}, {"d": 120, "r": "2 Samuel 13–14 • Salmos 6", "f": "Amnom e T amar; o retorno de Absalão — com o(s) Salmo(s) 6 composto(s) nessa ocasião", "c": 3}]}, {"phase_num": 5, "title": "Fase 5 — A Monarquia e os Salmos de Davi", "subtitle": "Dias 121 a 150 • 2 Samuel 15–24, Salmos, 1 Crônicas 21–29, 1 Reis 1–10 e 2 Crônicas 1–9", "start_day": 121, "end_day": 150, "days": [{"d": 121, "r": "2 Samuel 15 • Salmos 3–4, 38", "f": "A conspiração de Absalão; Davi foge de Jerusalém — com o(s) Salmo(s) 3, 4, 38 composto(s) nessa ocasião", "c": 4}, {"d": 122, "r": "2 Samuel 16–17 • Salmos 41, 55", "f": "Simei amaldiçoa; o conselho de Aitofel frustrado — com o(s) Salmo(s) 41, 55 composto(s) nessa ocasião", "c": 4}, {"d": 123, "r": "2 Samuel 18–19 • Salmos 28", "f": "A morte de Absalão; o pranto do rei — com o(s) Salmo(s) 28 composto(s) nessa ocasião", "c": 3}, {"d": 124, "r": "2 Samuel 20–21 • Salmos 5, 9", "f": "A revolta de Seba; os gibeonitas vingados — com o(s) Salmo(s) 5, 9 composto(s) nessa ocasião", "c": 4}, {"d": 125, "r": "2 Samuel 22 • Salmos 18", "f": "O cântico de livramento de Davi — com o(s) Salmo(s) 18 composto(s) nessa ocasião", "c": 2}, {"d": 126, "r": "2 Samuel 23 • Salmos 10–12", "f": "As últimas palavras de Davi e seus valentes — com o(s) Salmo(s) 10, 11, 12 composto(s) nessa ocasião", "c": 4}, {"d": 127, "r": "2 Samuel 24 • 1 Crônicas 21 • Salmos 30", "f": "O censo indevido e o altar na eira de Araúna — com o(s) Salmo(s) 30 composto(s) nessa ocasião", "c": 3}, {"d": 128, "r": "Salmos 13–14, 16–17", "f": "'Os céus declaram a glória de Deus'", "c": 4}, {"d": 129, "r": "Salmos 22, 25–26", "f": "'Jeová é o meu Pastor'; o sofrimento do justo", "c": 3}, {"d": 130, "r": "Salmos 27, 31, 33", "f": "'Jeová é a minha luz'; entrega confiante", "c": 3}, {"d": 131, "r": "Salmos 35–37", "f": "'Confie em Jeová e faça o bem'", "c": 3}, {"d": 132, "r": "Salmos 39–40, 53", "f": "Súplicas na doença e na traição", "c": 3}, {"d": 133, "r": "Salmos 58, 61–62", "f": "'Em Deus confio; não temerei'", "c": 3}, {"d": 134, "r": "Salmos 64–67", "f": "A terra louva a Jeová, que ouve a oração", "c": 4}, {"d": 135, "r": "Salmos 68–69", "f": "'Que Deus se levante'; o zelo pela Sua casa", "c": 2}, {"d": 136, "r": "Salmos 70–71, 86", "f": "A oração pela velhice; o reinado justo do filho de Davi", "c": 3}, {"d": 137, "r": "Salmos 108–110", "f": "'Dê graças a Jeová'; 'Senta-te à minha direita'", "c": 3}, {"d": 138, "r": "Salmos 138–139", "f": "'De um modo maravilhoso fui feito'", "c": 2}, {"d": 139, "r": "Salmos 140–141, 143", "f": "Últimas súplicas de Davi por livramento", "c": 3}, {"d": 140, "r": "Salmos 144–145 • 1 Crônicas 22–23", "f": "'Feliz o povo cujo Deus é Jeová!'", "c": 4}, {"d": 141, "r": "1 Crônicas 24–27", "f": "As 24 turmas sacerdotais e os músicos do templo", "c": 4}, {"d": 142, "r": "1 Crônicas 28–29 • Salmos 72", "f": "'Sirva a Deus de coração pleno'; ofertas para o templo — lido com o(s) Salmo(s) 72", "c": 3}, {"d": 143, "r": "1 Reis 1–2 • Salmos 127", "f": "Salomão é entronizado; as instruções finais de Davi — lido com o(s) Salmo(s) 127", "c": 3}, {"d": 144, "r": "1 Reis 3 • 2 Crônicas 1 • Salmos 45", "f": "Salomão pede um coração obediente e sábio — lido com o(s) Salmo(s) 45", "c": 3}, {"d": 145, "r": "1 Reis 4–5 • 2 Crônicas 2", "f": "A prosperidade do reinado; preparativos do templo", "c": 3}, {"d": 146, "r": "1 Reis 6 • 2 Crônicas 3 • 1 Reis 7 • 2 Crônicas 4", "f": "A construção do templo de Jeová", "c": 4}, {"d": 147, "r": "1 Reis 8 • 2 Crônicas 5", "f": "A oração de dedicação do templo", "c": 2}, {"d": 148, "r": "2 Crônicas 6–7 • Salmos 132", "f": "A dedicação do templo; fogo desce do céu — lido com o(s) Salmo(s) 132", "c": 3}, {"d": 149, "r": "1 Reis 9 • 2 Crônicas 8 • 1 Reis 10 • 2 Crônicas 9", "f": "Jeová aparece a Salomão pela segunda vez", "c": 4}, {"d": 150, "r": "Provérbios 1–3", "f": "'O temor de Jeová é o início do conhecimento'", "c": 3}]}, {"phase_num": 6, "title": "Fase 6 — Salomão e a Sabedoria", "subtitle": "Dias 151 a 180 • Provérbios, Eclesiastes, Cântico de Salomão, 1 Reis 11 e Salmos", "start_day": 151, "end_day": 180, "days": [{"d": 151, "r": "Provérbios 4–6", "f": "Guarde o coração; advertências contra a imoralidade", "c": 3}, {"d": 152, "r": "Provérbios 7–9", "f": "A sabedoria personificada convida a todos", "c": 3}, {"d": 153, "r": "Provérbios 10–12", "f": "Contrastes entre o justo e o mau", "c": 3}, {"d": 154, "r": "Provérbios 13–15", "f": "'A resposta branda desvia a fúria'", "c": 3}, {"d": 155, "r": "Provérbios 16–18", "f": "'O orgulho vem antes da queda'", "c": 3}, {"d": 156, "r": "Provérbios 19–21", "f": "Prudência, paciência e a língua controlada", "c": 3}, {"d": 157, "r": "Provérbios 22–24", "f": "'Eduque a criança no caminho certo'", "c": 3}, {"d": 158, "r": "Provérbios 25–27", "f": "As comparações de Salomão copiadas por Ezequias", "c": 3}, {"d": 159, "r": "Provérbios 28–31", "f": "O governante justo e o povo feliz", "c": 4}, {"d": 160, "r": "Eclesiastes 1–3", "f": "'Vaidade das vaidades'; há tempo para tudo", "c": 3}, {"d": 161, "r": "Eclesiastes 4–6", "f": "O valor do companheirismo; riquezas sem proveito", "c": 3}, {"d": 162, "r": "Eclesiastes 7–9", "f": "O bom nome; aproveite a vida com temor a Deus", "c": 3}, {"d": 163, "r": "Eclesiastes 10–12", "f": "'T ema o verdadeiro Deus e guarde os seus mandamentos'", "c": 3}, {"d": 164, "r": "Cântico de Salomão 1–4", "f": "A sulamita e seu amor leal ao pastor", "c": 4}, {"d": 165, "r": "Cântico de Salomão 5–8", "f": "'O amor é tão forte quanto a morte'", "c": 4}, {"d": 166, "r": "1 Reis 11 • Salmos 42–43", "f": "A queda de Salomão: esposas estrangeiras e idolatria — lido com o(s) Salmo(s) 42, 43", "c": 3}, {"d": 167, "r": "Salmos 44, 47", "f": "'Como a corça anseia por água'; o rei e sua noiva", "c": 2}, {"d": 168, "r": "Salmos 48–50", "f": "'Deus é o nosso refúgio'; Sião, a cidade do Grande Rei", "c": 3}, {"d": 169, "r": "Salmos 73, 75–77", "f": "A prosperidade dos maus vista do santuário", "c": 4}, {"d": 170, "r": "Salmos 78, 80–81", "f": "As lições da história de Israel para os filhos", "c": 3}, {"d": 171, "r": "Salmos 82–84", "f": "'Tu, cujo nome é Jeová, somente tu és o Altíssimo'", "c": 3}, {"d": 172, "r": "Salmos 85, 87–88", "f": "Orações por restauração e nas horas mais escuras", "c": 3}, {"d": 173, "r": "Salmos 91–94", "f": "'A sombra do Altíssimo'; Jeová não abandona seu povo", "c": 4}, {"d": 174, "r": "Salmos 97–100", "f": "'Jeová é Rei!'; entrem com agradecimento", "c": 4}, {"d": 175, "r": "Salmos 102–104, 106", "f": "Jeová é misericordioso: remove nossos pecados para longe", "c": 4}, {"d": 176, "r": "Salmos 107, 111–112", "f": "'Dê graças a Jeová'; 'Senta-te à minha direita'", "c": 3}, {"d": 177, "r": "Salmos 113–115", "f": "O Hallel: louvores ao Deus que se inclina para ver", "c": 3}, {"d": 178, "r": "Salmos 116–118", "f": "'A pedra que os construtores rejeitaram'", "c": 3}, {"d": 179, "r": "Salmos 119", "f": "O grande salmo alfabético: amor à lei de Jeová", "c": 1}, {"d": 180, "r": "Salmos 120–124", "f": "Os cânticos de subida: 'O meu socorro vem de Jeová'", "c": 5}]}, {"phase_num": 7, "title": "Fase 7 — O Reino Dividido e os Profetas", "subtitle": "Dias 181 a 210 • Salmos Finais, Reis, Crônicas, Obadias, Joel, Jonas, Amós, Isaías e Oseias", "start_day": 181, "end_day": 210, "days": [{"d": 181, "r": "Salmos 125, 128–130", "f": "'Os que semeiam com lágrimas colherão com gritos de alegria'", "c": 4}, {"d": 182, "r": "Salmos 131, 133–135", "f": "A união dos irmãos; louvor no templo", "c": 4}, {"d": 183, "r": "Salmos 136, 146", "f": "'Seu amor leal dura para sempre'", "c": 2}, {"d": 184, "r": "Salmos 147–150", "f": "O grande final: 'Tudo o que respira louve a Jah!'", "c": 4}, {"d": 185, "r": "1 Reis 12 • 2 Crônicas 10–11", "f": "O reino se divide: Roboão e Jeroboão", "c": 3}, {"d": 186, "r": "1 Reis 13–14 • 2 Crônicas 12", "f": "O profeta desobediente; os bezerros de ouro de Jeroboão", "c": 3}, {"d": 187, "r": "1 Reis 15 • 2 Crônicas 13–14", "f": "Reis de Judá e Israel; a dinastia de Onri", "c": 3}, {"d": 188, "r": "2 Crônicas 15–16 • 1 Reis 16", "f": "A reforma de Asa e seu erro final", "c": 3}, {"d": 189, "r": "2 Crônicas 17 • 1 Reis 17–18", "f": "Jeosafá ensina a Lei em Judá", "c": 3}, {"d": 190, "r": "1 Reis 19–21", "f": "A voz calma e suave; o vinhedo de Nabote", "c": 3}, {"d": 191, "r": "1 Reis 22 • 2 Crônicas 18", "f": "Micaías profetiza; a morte de Acabe", "c": 2}, {"d": 192, "r": "2 Crônicas 19–20 • 2 Reis 1", "f": "'A batalha não é de vocês, mas de Deus'", "c": 3}, {"d": 193, "r": "2 Reis 2–5", "f": "Elias arrebatado; Eliseu recebe seu manto", "c": 4}, {"d": 194, "r": "2 Reis 6–7", "f": "O machado que flutua; o cerco de Samaria quebrado", "c": 2}, {"d": 195, "r": "2 Reis 8–9 • 2 Crônicas 21", "f": "Jeú ungido: o extermínio da casa de Acabe", "c": 3}, {"d": 196, "r": "2 Crônicas 22 • Obadias 1 • 2 Reis 10", "f": "Atalia usurpa o trono; Jeoiada age com coragem", "c": 3}, {"d": 197, "r": "2 Reis 11–12 • 2 Crônicas 23", "f": "Atalia deposta; o menino-rei Jeoás repara o templo", "c": 3}, {"d": 198, "r": "2 Crônicas 24 • Joel 1–3", "f": "Jeoás repara o templo, mas apostata", "c": 4}, {"d": 199, "r": "2 Reis 13–14 • 2 Crônicas 25", "f": "As últimas profecias de Eliseu; Jeroboão II", "c": 3}, {"d": 200, "r": "Jonas 1–4", "f": "Jonas, o grande peixe e a misericórdia de Jeová com Nínive", "c": 4}, {"d": 201, "r": "Amós 1–3", "f": "O pastor de T ecoa denuncia as nações", "c": 3}, {"d": 202, "r": "Amós 4–6", "f": "'Prepare-se para encontrar o seu Deus, ó Israel'", "c": 3}, {"d": 203, "r": "Amós 7–9", "f": "O prumo, o cesto de frutas e a restauração prometida", "c": 3}, {"d": 204, "r": "2 Reis 15 • 2 Crônicas 26", "f": "Uzias, o rei leproso; instabilidade em Israel", "c": 2}, {"d": 205, "r": "Isaías 1–3", "f": "'Venham, e acertemos as contas'; Judá acusada", "c": 3}, {"d": 206, "r": "Isaías 4–6", "f": "A visão do trono de Jeová: 'Eis-me aqui! Envia-me!'", "c": 3}, {"d": 207, "r": "Oseias 1–3", "f": "O casamento de Oseias retrata o amor leal de Jeová", "c": 3}, {"d": 208, "r": "Oseias 4–7", "f": "'Meu povo é destruído por falta de conhecimento'", "c": 4}, {"d": 209, "r": "2 Crônicas 27 • Miqueias 1–2", "f": "Jotão se fortalece porque anda com Jeová", "c": 3}, {"d": 210, "r": "2 Reis 16 • 2 Crônicas 28 • Isaías 7", "f": "Acaz apostata e fecha o templo", "c": 3}]}, {"phase_num": 8, "title": "Fase 8 — Isaías, Jeremias e a Queda de Jerusalém", "subtitle": "Dias 211 a 240 • Isaías 8–66, Oseias, Miqueias, 2 Reis, 2 Crônicas, Naum, Sofonias e Habacuque", "start_day": 211, "end_day": 240, "days": [{"d": 211, "r": "Isaías 8–10", "f": "'Um menino nos nasceu': Príncipe da Paz", "c": 3}, {"d": 212, "r": "Isaías 11–12 • Oseias 8–9", "f": "O renovo de Jessé; o lobo com o cordeiro", "c": 4}, {"d": 213, "r": "Oseias 10–12", "f": "'Quando Israel era menino, eu o amei'", "c": 3}, {"d": 214, "r": "Oseias 13–14 • 2 Reis 17", "f": "'Da sepultura eu os resgatarei'; o retorno a Jeová", "c": 3}, {"d": 215, "r": "Miqueias 3–5", "f": "Belém: a origem do futuro governante de Israel", "c": 3}, {"d": 216, "r": "Miqueias 6–7 • 2 Reis 18 • 2 Crônicas 29", "f": "'O que Jeová exige?': justiça, bondade e modéstia", "c": 4}, {"d": 217, "r": "2 Crônicas 30–31", "f": "A grande Páscoa; as contribuições reorganizadas", "c": 2}, {"d": 218, "r": "Isaías 13–15", "f": "Pronunciamentos contra Babilônia e Moabe", "c": 3}, {"d": 219, "r": "Isaías 16–18", "f": "Pronunciamentos contra as nações vizinhas", "c": 3}, {"d": 220, "r": "Isaías 19–21", "f": "Egito e Babilônia: 'Caiu! Babilônia caiu!'", "c": 3}, {"d": 221, "r": "Isaías 22–23", "f": "O vale da visão; a queda de Tiro", "c": 2}, {"d": 222, "r": "Isaías 24–26", "f": "A terra devastada; 'confiem em Jah para sempre'", "c": 3}, {"d": 223, "r": "Isaías 27–30", "f": "O Leviatã morto; a pedra de esquina em Sião", "c": 4}, {"d": 224, "r": "Isaías 31–33", "f": "Ai dos que descem ao Egito; o Rei reinará com justiça", "c": 3}, {"d": 225, "r": "Isaías 34–35", "f": "A vingança de Jeová; o deserto florescerá", "c": 2}, {"d": 226, "r": "2 Reis 19 • 2 Crônicas 32 • Salmos 46", "f": "O anjo de Jeová fere 185 mil assírios — lido com o(s) Salmo(s) 46", "c": 3}, {"d": 227, "r": "Isaías 36–37", "f": "Senaqueribe desafia a Jeová e é derrotado", "c": 2}, {"d": 228, "r": "2 Reis 20 • Isaías 38–39", "f": "A vida de Ezequias prolongada por 15 anos", "c": 3}, {"d": 229, "r": "Isaías 40–43", "f": "'Consolem o meu povo'; o Criador das estrelas", "c": 4}, {"d": 230, "r": "Isaías 44–45", "f": "Ciro nomeado 150 anos antes; os ídolos são nada", "c": 2}, {"d": 231, "r": "Isaías 46–48", "f": "Babilônia cairá; 'Quem dera tivesse prestado atenção!'", "c": 3}, {"d": 232, "r": "Isaías 49–51", "f": "O Servo, luz para as nações; consolo para Sião", "c": 3}, {"d": 233, "r": "Isaías 52–54", "f": "O Servo Sofredor: 'ele carregou os nossos pecados'", "c": 3}, {"d": 234, "r": "Isaías 55–57", "f": "'Venham, todos os que têm sede!'", "c": 3}, {"d": 235, "r": "Isaías 58–60", "f": "O jejum verdadeiro; 'Levanta-te, ó mulher, e brilha'", "c": 3}, {"d": 236, "r": "Isaías 61–63", "f": "'O espírito de Jeová está sobre mim'", "c": 3}, {"d": 237, "r": "Isaías 64–66", "f": "Novos céus e nova terra: a esperança final", "c": 3}, {"d": 238, "r": "2 Reis 21 • 2 Crônicas 33 • Naum 1–3", "f": "Manassés: o rei mais perverso se arrepende", "c": 5}, {"d": 239, "r": "2 Reis 22 • 2 Crônicas 34 • Sofonias 1", "f": "Josias e o livro da Lei achado no templo", "c": 3}, {"d": 240, "r": "Sofonias 2–3 • Habacuque 1–2", "f": "'Busquem a Jeová... talvez sejam escondidos'", "c": 4}]}, {"phase_num": 9, "title": "Fase 9 — O Exílio em Babilônia e a Restauração", "subtitle": "Dias 241 a 270 • Habacuque 3, Jeremias, Lamentações, Salmos do Exílio e Ezequiel 1–39", "start_day": 241, "end_day": 270, "days": [{"d": 241, "r": "Habacuque 3 • 2 Reis 23 • 2 Crônicas 35", "f": "A oração-cântico de Habacuque: alegria apesar de tudo", "c": 3}, {"d": 242, "r": "Jeremias 1–4", "f": "Jeremias chamado ainda jovem (627 a.C.)", "c": 4}, {"d": 243, "r": "Jeremias 5–9", "f": "Jerusalém sitiada pela própria culpa", "c": 5}, {"d": 244, "r": "Jeremias 10–12", "f": "Os ídolos são vaidade; o pacto violado", "c": 3}, {"d": 245, "r": "Jeremias 13–15", "f": "O cinto arruinado; 'Você desistiu de mim'", "c": 3}, {"d": 246, "r": "Jeremias 16–18", "f": "O oleiro e o barro: Jeová molda as nações", "c": 3}, {"d": 247, "r": "Jeremias 19–20 • 2 Crônicas 36", "f": "O jarro quebrado; 'um fogo aceso no meu coração'", "c": 3}, {"d": 248, "r": "2 Reis 24 • Jeremias 22–23", "f": "Nabucodonosor domina Judá; o primeiro exílio", "c": 3}, {"d": 249, "r": "Jeremias 25–26, 35", "f": "Os 70 anos de desolação anunciados", "c": 3}, {"d": 250, "r": "Jeremias 36, 45–46", "f": "Jeoiaquim queima o rolo; Jeová o reescreve", "c": 3}, {"d": 251, "r": "Jeremias 47–49, 21", "f": "Pronunciamentos contra a Filísteia e Moabe", "c": 4}, {"d": 252, "r": "Jeremias 24, 27–28", "f": "Os figos bons e os podres", "c": 3}, {"d": 253, "r": "Jeremias 29, 50–51", "f": "A carta aos exilados: 'Busquem a paz da cidade'", "c": 3}, {"d": 254, "r": "Jeremias 30–33", "f": "O novo pacto prometido: a lei no coração", "c": 4}, {"d": 255, "r": "Jeremias 34, 37–38", "f": "Advertência sobre os escravos libertos e reescravizados", "c": 3}, {"d": 256, "r": "2 Reis 25 • Jeremias 39–42", "f": "A destruição de Jerusalém e do templo (607 a.C.)", "c": 5}, {"d": 257, "r": "Jeremias 43–44, 52", "f": "A fuga para o Egito contra a ordem de Jeová", "c": 3}, {"d": 258, "r": "Lamentações 1–5", "f": "Jerusalém chora solitária suas ruínas", "c": 5}, {"d": 259, "r": "Salmos 137, 79, 74", "f": "Junto aos rios da Babilônia: saudade de Sião", "c": 3}, {"d": 260, "r": "Ezequiel 1–3", "f": "A visão do carro celestial; o vigia de Israel", "c": 3}, {"d": 261, "r": "Ezequiel 4–6", "f": "O cerco encenado; os altares idólatras condenados", "c": 3}, {"d": 262, "r": "Ezequiel 7–9", "f": "'O fim chegou'; o homem com o tinteiro de secretário", "c": 3}, {"d": 263, "r": "Ezequiel 10–12", "f": "A glória de Jeová deixa o templo", "c": 3}, {"d": 264, "r": "Ezequiel 13–15", "f": "Contra os falsos profetas e os corações idólatras", "c": 3}, {"d": 265, "r": "Ezequiel 16–20", "f": "Jerusalém, a esposa infiel; a parábola das águias", "c": 5}, {"d": 266, "r": "Ezequiel 21–24", "f": "A espada afiada de Jeová contra Jerusalém", "c": 4}, {"d": 267, "r": "Ezequiel 25–27", "f": "Pronunciamentos contra as nações; o naufrágio de Tiro", "c": 3}, {"d": 268, "r": "Ezequiel 28–30", "f": "A queda do 'querubim ungido'; o Egito julgado", "c": 3}, {"d": 269, "r": "Ezequiel 31–34", "f": "O grande cedro derrubado; lamento sobre Faraó", "c": 4}, {"d": 270, "r": "Ezequiel 35–39", "f": "Edom julgado; 'Vou santificar o meu grande nome'", "c": 5}]}, {"phase_num": 10, "title": "Fase 10 — A Vida e o Ministério de Jesus Cristo", "subtitle": "Dias 271 a 300 • Ezequiel 40–48, Daniel, Esdras, Ageu, Zacarias, Ester, Neemias, Malaquias e Evangelhos", "start_day": 271, "end_day": 300, "days": [{"d": 271, "r": "Ezequiel 40–44", "f": "A visão do templo: as medidas do santuário", "c": 5}, {"d": 272, "r": "Ezequiel 45–48", "f": "As contribuições e as festividades do templo visionário", "c": 4}, {"d": 273, "r": "Daniel 1–4", "f": "Íntegros em Babilônia; a estátua e o Reino eterno", "c": 4}, {"d": 274, "r": "Daniel 5–8", "f": "A escrita na parede; Daniel na cova dos leões", "c": 4}, {"d": 275, "r": "Daniel 9–12", "f": "As 70 semanas até o Messias; a visita angélica", "c": 4}, {"d": 276, "r": "Esdras 1–2 • Salmos 126", "f": "O decreto de Ciro; o retorno do exílio (537 a.C.) — lido com o(s) Salmo(s) 126", "c": 3}, {"d": 277, "r": "Esdras 3–4 • Ageu 1", "f": "O altar restaurado; a oposição paralisa a obra", "c": 3}, {"d": 278, "r": "Ageu 2 • Zacarias 1–2", "f": "'A glória desta casa será maior que a da antiga'", "c": 3}, {"d": 279, "r": "Zacarias 3–5", "f": "Josué purificado; o candelabro e as duas oliveiras", "c": 3}, {"d": 280, "r": "Zacarias 6–8", "f": "A coroa para o 'Renovo'; o jejum que Jeová aprova", "c": 3}, {"d": 281, "r": "Esdras 5–6 • Zacarias 9–11", "f": "O templo reconstruído e inaugurado (515 a.C.)", "c": 5}, {"d": 282, "r": "Zacarias 12–14", "f": "'Olharão para aquele que traspassaram'; Jeová será Rei", "c": 3}, {"d": 283, "r": "Ester 1–5", "f": "Vasti deposta; Ester torna-se rainha na Pérsia", "c": 5}, {"d": 284, "r": "Ester 6–8", "f": "A queda de Hamã; o decreto de salvação", "c": 3}, {"d": 285, "r": "Ester 9–10 • Esdras 7–8", "f": "A vitória dos judeus e a festividade de Purim", "c": 4}, {"d": 286, "r": "Esdras 9–10", "f": "A oração de Esdras e a purificação do povo", "c": 2}, {"d": 287, "r": "Neemias 1–3", "f": "Neemias ora e obtém permissão para reconstruir os muros", "c": 3}, {"d": 288, "r": "Neemias 4–7", "f": "A obra avança apesar de zombaria e conspiração", "c": 4}, {"d": 289, "r": "Neemias 8–11", "f": "A leitura pública da Lei; a Festa das Barracas", "c": 4}, {"d": 290, "r": "Neemias 12–13 • Malaquias 1–2", "f": "A inauguração dos muros; as reformas finais", "c": 4}, {"d": 291, "r": "Malaquias 3–4 • Lucas 1 • João 1", "f": "O mensageiro do pacto; o 'Elias' antes do grande dia", "c": 4}, {"d": 292, "r": "Mateus 1 • Lucas 2", "f": "A genealogia real e o nascimento de Jesus", "c": 2}, {"d": 293, "r": "Mateus 2–3 • Lucas 3", "f": "Os astrólogos; João prepara o caminho; o batismo", "c": 3}, {"d": 294, "r": "Mateus 4 • Marcos 1 • Lucas 4", "f": "As tentações no deserto; o ministério começa", "c": 3}, {"d": 295, "r": "João 2–4", "f": "Caná; Nicodemos e o novo nascimento; a samaritana", "c": 3}, {"d": 296, "r": "Lucas 5 • Marcos 2 • João 5", "f": "A pesca milagrosa; 'passarão a apanhar homens vivos'", "c": 3}, {"d": 297, "r": "Mateus 12 • Marcos 3 • Lucas 6", "f": "Senhor do sábado; o pecado contra o espírito", "c": 3}, {"d": 298, "r": "Mateus 5–7", "f": "O Sermão do Monte: a lei do Reino dos céus", "c": 3}, {"d": 299, "r": "Mateus 8 • Lucas 7 • Mateus 11 • Lucas 8", "f": "Curas que cumprem Isaías: 'ele levou as nossas doenças'", "c": 4}, {"d": 300, "r": "Mateus 13 • Marcos 4 • Mateus 9 • Marcos 5", "f": "As parábolas do Reino: o semeador, o joio, a pérola", "c": 4}]}, {"phase_num": 11, "title": "Fase 11 — A Congregação Primitiva e as Viagens de Paulo", "subtitle": "Dias 301 a 330 • Harmonia dos Evangelhos, Atos 1–19, Tiago, Gálatas, 1 e 2 Tessalonicenses e 1 Coríntios", "start_day": 301, "end_day": 330, "days": [{"d": 301, "r": "Mateus 10, 14 • Marcos 6", "f": "Os 12 apóstolos enviados a pregar o Reino", "c": 3}, {"d": 302, "r": "João 6 • Mateus 15 • Marcos 7–8 • Mateus 16", "f": "'Eu sou o pão da vida'; muitos tropeçam", "c": 5}, {"d": 303, "r": "Mateus 17 • Marcos 9 • Lucas 9", "f": "A transfiguração: prévia da glória do Reino", "c": 3}, {"d": 304, "r": "Mateus 18 • João 7–9", "f": "A humildade e o perdão 'setenta e sete vezes'", "c": 4}, {"d": 305, "r": "João 10 • Lucas 10–12", "f": "'Eu sou o pastor excelente'; 'eu e o Pai somos um'", "c": 4}, {"d": 306, "r": "Lucas 13–16", "f": "A porta estreita; o custo de ser discípulo", "c": 4}, {"d": 307, "r": "Lucas 17 • João 11 • Lucas 18 • Mateus 19 • Marcos 10", "f": "Os dez leprosos; 'o Reino está no meio de vocês'", "c": 5}, {"d": 308, "r": "Mateus 20 • Lucas 19", "f": "Os trabalhadores do vinhedo; 'servir, e não ser servido'", "c": 2}, {"d": 309, "r": "Mateus 21 • Marcos 11 • João 12", "f": "A entrada triunfal e a purificação do templo", "c": 3}, {"d": 310, "r": "Mateus 22 • Marcos 12 • Lucas 20", "f": "As festas de casamento; 'a César o que é de César'", "c": 3}, {"d": 311, "r": "Mateus 23 • Lucas 21 • Mateus 24 • Marcos 13", "f": "Os 'ais' contra escribas e fariseus hipócritas", "c": 4}, {"d": 312, "r": "Mateus 25–26 • Marcos 14", "f": "As dez virgens, os talentos, as ovelhas e os cabritos", "c": 3}, {"d": 313, "r": "Lucas 22 • João 13–16", "f": "A Páscoa final; o suor como gotas de sangue", "c": 5}, {"d": 314, "r": "João 17 • Mateus 27", "f": "A oração final: 'Conhecerem a ti, o único Deus verdadeiro'", "c": 2}, {"d": 315, "r": "Marcos 15 • Lucas 23 • João 18", "f": "Diante de Pilatos; a morte na estaca", "c": 3}, {"d": 316, "r": "João 19 • Mateus 28 • Marcos 16", "f": "'Está consumado!'; o sepultamento apressado", "c": 3}, {"d": 317, "r": "Lucas 24 • João 20–21", "f": "O caminho para Emaús; a ascensão ao céu", "c": 3}, {"d": 318, "r": "Atos 1–5", "f": "A ascensão; o espírito santo derramado no Pentecostes de 33 d.C.", "c": 5}, {"d": 319, "r": "Atos 6–9", "f": "Estêvão, a primeira testemunha morta pela fé", "c": 4}, {"d": 320, "r": "Atos 10–12 • Tiago 1–2", "f": "Cornélio: as boas novas chegam aos gentios", "c": 5}, {"d": 321, "r": "Tiago 3–5", "f": "A língua domada; 'a oração do justo tem grande poder'", "c": 3}, {"d": 322, "r": "Atos 13–14", "f": "A primeira viagem missionária de Paulo e Barnabé", "c": 2}, {"d": 323, "r": "Atos 15 • Gálatas 1–2", "f": "O concílio de Jerusalém decide sobre a circuncisão", "c": 3}, {"d": 324, "r": "Gálatas 3–6 • Atos 16", "f": "A Lei como tutor que conduz a Cristo", "c": 5}, {"d": 325, "r": "Atos 17 • 1 Tessalonicenses 1–2", "f": "Atenas: 'o Deus que fez o mundo' anunciado no Areópago", "c": 3}, {"d": 326, "r": "1 Tessalonicenses 3–5", "f": "'O dia de Jeová vem como ladrão'; consolem-se uns aos outros", "c": 3}, {"d": 327, "r": "2 Tessalonicenses 1–3 • Atos 18", "f": "A apostasia predita; firmeza antes do dia de Jeová", "c": 4}, {"d": 328, "r": "Atos 19 • 1 Coríntios 1–4", "f": "Éfeso: os rolos de magia queimados; o tumulto de Ártemis", "c": 5}, {"d": 329, "r": "1 Coríntios 5–7", "f": "A moral na congregação; conselhos sobre o casamento", "c": 3}, {"d": 330, "r": "1 Coríntios 8–10", "f": "A consciência alheia; 'fujam da idolatria'", "c": 3}]}, {"phase_num": 12, "title": "Fase 12 — As Epístolas Finais e a Revelação", "subtitle": "Dias 331 a 365 • 1 e 2 Coríntios, Romanos, Atos 20–28, Cartas da Prisão, Hebreus, Pastorais, Pedro, João, Judas e Apocalipse", "start_day": 331, "end_day": 365, "days": [{"d": 331, "r": "1 Coríntios 11–14", "f": "A Refeição do Senhor; um só corpo, muitos membros", "c": 4}, {"d": 332, "r": "1 Coríntios 15–16", "f": "A ressurreição: 'Morte, onde está a tua vitória?'", "c": 2}, {"d": 333, "r": "2 Coríntios 1–3", "f": "O Deus de todo o consolo; ministros de um novo pacto", "c": 3}, {"d": 334, "r": "2 Coríntios 4–6", "f": "'T emos este tesouro em vasos de barro'", "c": 3}, {"d": 335, "r": "2 Coríntios 7–9", "f": "A tristeza segundo Deus; 'Deus ama quem dá com alegria'", "c": 3}, {"d": 336, "r": "2 Coríntios 10–13", "f": "Paulo defende seu apostolado contra os 'superapóstolos'", "c": 4}, {"d": 337, "r": "Romanos 1–2 • Atos 20", "f": "'O justo viverá pela fé'; judeus e gregos sem desculpa", "c": 3}, {"d": 338, "r": "Romanos 3–5", "f": "Declarados justos pela fé no resgate de Cristo", "c": 3}, {"d": 339, "r": "Romanos 6–8", "f": "Vivos para Deus; 'nem morte nem vida nos separará'", "c": 3}, {"d": 340, "r": "Romanos 9–11", "f": "Israel e a misericórdia de Deus; a oliveira simbólica", "c": 3}, {"d": 341, "r": "Romanos 12–14", "f": "'Transformem a sua mente'; sujeição às autoridades", "c": 3}, {"d": 342, "r": "Romanos 15–16 • Atos 21", "f": "A unidade entre judeus e gentios; saudações finais", "c": 3}, {"d": 343, "r": "Atos 22–26", "f": "A defesa perante o povo e o Sinédrio", "c": 5}, {"d": 344, "r": "Atos 27–28 • Efésios 1–3", "f": "O naufrágio em Malta; pregando em Roma sem impedimento", "c": 5}, {"d": 345, "r": "Efésios 4–6", "f": "A nova personalidade e a armadura espiritual completa", "c": 3}, {"d": 346, "r": "Colossenses 1–4 • Filemom 1", "f": "Cristo, 'a imagem do Deus invisível' , acima de tudo", "c": 5}, {"d": 347, "r": "Filipenses 1–4", "f": "'Para mim, viver é Cristo'; a humildade de Jesus", "c": 4}, {"d": 348, "r": "Hebreus 1–3", "f": "O Filho, superior aos anjos e a Moisés", "c": 3}, {"d": 349, "r": "Hebreus 4–6", "f": "Jesus, Sumo Sacerdote 'à maneira de Melquisedeque'", "c": 3}, {"d": 350, "r": "Hebreus 7–10", "f": "O sacerdócio superior e o novo pacto", "c": 4}, {"d": 351, "r": "Hebreus 11–13", "f": "A galeria da fé; 'Jesus Cristo é o mesmo ontem e hoje'", "c": 3}, {"d": 352, "r": "1 Timóteo 1–3", "f": "Instruções para a congregação e seus superintendentes", "c": 3}, {"d": 353, "r": "1 Timóteo 4–6", "f": "'A devoção a Deus com autossuficiência é grande ganho'", "c": 3}, {"d": 354, "r": "Tito 1–3", "f": "Congregações em Creta: sãos na fé e zelosos de boas obras", "c": 3}, {"d": 355, "r": "1 Pedro 1–3", "f": "Um novo nascimento para uma esperança viva", "c": 3}, {"d": 356, "r": "1 Pedro 4–5 • 2 Pedro 1", "f": "'Lancem sobre ele toda a sua ansiedade'", "c": 3}, {"d": 357, "r": "2 Pedro 2–3 • 2 Timóteo 1–2", "f": "Os falsos mestres; o dia de Jeová e os novos céus", "c": 4}, {"d": 358, "r": "2 Timóteo 3–4 • Judas 1", "f": "'T oda a Escritura é inspirada'; 'Travei a luta excelente'", "c": 3}, {"d": 359, "r": "1 João 1–4", "f": "Andar na luz; 'o mundo está passando'", "c": 4}, {"d": 360, "r": "1 João 5 • 2 João 1 • 3 João 1", "f": "'A fé é a vitória que venceu o mundo'", "c": 3}, {"d": 361, "r": "Apocalipse 1–3", "f": "A Revelação começa: mensagens às sete congregações (~96 d.C.)", "c": 3}, {"d": 362, "r": "Apocalipse 4–7", "f": "O trono de Jeová; o Cordeiro abre os selos", "c": 4}, {"d": 363, "r": "Apocalipse 8–12", "f": "Os 144 mil selados; as primeiras trombetas", "c": 5}, {"d": 364, "r": "Apocalipse 13–17", "f": "As feras simbólicas; as mensagens angélicas", "c": 5}, {"d": 365, "r": "Apocalipse 18–22", "f": "A Nova Jerusalém e a árvore da vida: 'Vem, Senhor Jesus!' — o triunfo final do Reino", "c": 5}]}];
+const STORAGE_KEY = "jw_biblia_cronologica_365_v1";
+
+function getTodayIso() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return y + "-" + m + "-" + day;
+}
+
+function formatIsoToBr(isoStr) {
+  if (!isoStr || typeof isoStr !== "string") return "";
+  const parts = isoStr.split("-");
+  if (parts.length !== 3) return isoStr;
+  return parts[2] + "/" + parts[1] + "/" + parts[0];
+}
+
+function createDefaultState() {
+  return {
+    theme: "light",
+    fontScale: 1,
+    openPhases: { "1": true },
+    openGems: {},
+    dayDone: {},   // { "1": true }
+    dayDate: {},   // { "1": "2026-10-31" }
+    dayGem: {}     // { "1": "Texto ou gema espiritual..." }
+  };
+}
+
+let appState = createDefaultState();
+let activeFilter = "all";
+let activePhaseFilter = "all";
+let searchQuery = "";
+let pendingModalAction = null;
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      appState = Object.assign(createDefaultState(), JSON.parse(raw));
+    }
+  } catch (e) {}
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+  } catch (e) {}
+}
+
+function showToast(msg) {
+  const el = document.getElementById("toast-msg");
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = "block";
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => { el.style.display = "none"; }, 2000);
+}
+
+function openConfirmModal(title, desc, onConfirm) {
+  document.getElementById("modal-title").textContent = title;
+  document.getElementById("modal-desc").textContent = desc;
+  pendingModalAction = onConfirm;
+  document.getElementById("confirm-modal").classList.add("open");
+}
+
+function closeConfirmModal() {
+  document.getElementById("confirm-modal").classList.remove("open");
+  pendingModalAction = null;
+}
+
+function escapeHtml(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function parseReadingPills(readingStr) {
+  return String(readingStr || "")
+    .split("•")
+    .map(s => s.trim())
+    .filter(Boolean)
+    .map(seg => ({
+      label: seg,
+      wolUrl: "https://wol.jw.org/pt/wol/l/r5/lp-t?q=" + encodeURIComponent(seg)
+    }));
+}
+
+function applyVisualPrefs() {
+  if (appState.theme === "dark") {
+    document.documentElement.setAttribute("data-theme", "dark");
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+  }
+  document.documentElement.style.setProperty("--font-scale", String(appState.fontScale || 1));
+}
+
+function computeTotalsAndRenderSpotlight() {
+  let doneDays = 0;
+  let doneChapters = 0;
+  let donePhases = 0;
+  let nextUnread = null;
+  let latestDate = "";
+  let latestDayNum = 0;
+
+  PHASES_DATA.forEach(ph => {
+    let allPhDone = true;
+    ph.days.forEach(item => {
+      const k = String(item.d);
+      if (appState.dayDone[k]) {
+        doneDays++;
+        doneChapters += item.c;
+        const dt = appState.dayDate[k] || "";
+        if (dt && dt >= latestDate) {
+          latestDate = dt;
+          latestDayNum = item.d;
+        }
+      } else {
+        allPhDone = false;
+        if (!nextUnread) {
+          nextUnread = { ph, item };
+        }
+      }
+    });
+    if (allPhDone) donePhases++;
+  });
+
+  const pct = Math.round((doneDays / 365) * 100);
+  document.getElementById("hdr-prog-text").textContent = "Progresso: " + pct + "% (" + doneDays + "/365 dias concluídos)";
+  document.getElementById("hdr-chap-text").textContent = doneChapters + " / 1.189 capítulos lidos • " + donePhases + "/12 Fases";
+  document.getElementById("hdr-prog-fill").style.width = pct + "%";
+  document.getElementById("hdr-prog-bar-wrap").setAttribute("aria-valuenow", String(pct));
+
+  document.getElementById("kpi-days").textContent = doneDays + " / 365";
+  document.getElementById("kpi-pct-sub").textContent = (365 - doneDays) + " dias restantes (" + pct + "%)";
+  document.getElementById("kpi-chapters").textContent = doneChapters + " / 1.189";
+  document.getElementById("kpi-phases").textContent = donePhases + " / 12";
+  document.getElementById("kpi-last-date").textContent = latestDate ? formatIsoToBr(latestDate) : "—";
+  document.getElementById("kpi-last-day").textContent = latestDayNum ? ("Dia " + latestDayNum + " concluído") : "Nenhum dia marcado";
+
+  const spotMount = document.getElementById("next-reading-mount");
+  if (!spotMount) return;
+
+  if (!nextUnread) {
+    spotMount.innerHTML = '<div class="next-reading-card"><div class="next-reading-info"><span class="next-tag">🎉 Parabéns!</span><h2 class="next-title">Você concluiu todos os 365 dias (1.189 capítulos) da Bíblia Cronológica!</h2><p class="next-focus" style="margin:0;">Exporte seu diário completo na aba Histórico e Gemas.</p></div></div>';
+    return;
+  }
+
+  const dNum = nextUnread.item.d;
+  const pillsHtml = parseReadingPills(nextUnread.item.r).map(p =>
+    '<a href="' + escapeHtml(p.wolUrl) + '" target="_blank" rel="noopener noreferrer" class="verse-pill" title="Abrir capítulos na Biblioteca On-line (WOL)">📖 ' + escapeHtml(p.label) + ' ↗</a>'
+  ).join("");
+  const curDateVal = appState.dayDate[String(dNum)] || getTodayIso();
+
+  spotMount.innerHTML =
+    '<div class="next-reading-card">' +
+    '  <div class="next-reading-info">' +
+    '    <span class="next-tag">📖 Próxima Leitura • ' + escapeHtml(nextUnread.ph.title) + '</span>' +
+    '    <h2 class="next-title">Dia ' + dNum + ' — ' + escapeHtml(nextUnread.item.r) + '</h2>' +
+    '    <p class="next-focus">' + escapeHtml(nextUnread.item.f) + '</p>' +
+    '    <div class="verse-pills-row">' + pillsHtml + '</div>' +
+    '  </div>' +
+    '  <div class="next-actions">' +
+    '    <input type="date" id="spot-date-input" class="day-date-input" value="' + escapeHtml(curDateVal) + '" aria-label="Data de conclusão do Dia ' + dNum + '">' +
+    '    <button type="button" class="btn-primary" data-action="complete-spot-day" data-day="' + dNum + '">✓ Concluir Dia ' + dNum + '</button>' +
+    '  </div>' +
+    '</div>';
+}
+
+function dayMatchesFilter(item) {
+  const k = String(item.d);
+  const isDone = !!appState.dayDone[k];
+  const hasGem = !!(appState.dayGem[k] && appState.dayGem[k].trim());
+
+  if (activeFilter === "pending" && isDone) return false;
+  if (activeFilter === "completed" && !isDone) return false;
+  if (activeFilter === "with_gem" && !hasGem) return false;
+
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    const gemTxt = (appState.dayGem[k] || "").toLowerCase();
+    const hay = ("dia " + item.d + " " + item.r + " " + item.f + " " + gemTxt).toLowerCase();
+    if (!hay.includes(q)) return false;
+  }
+  return true;
+}
+
+function renderPhases() {
+  const mount = document.getElementById("phases-mount");
+  if (!mount) return;
+
+  let html = "";
+  let visibleDays = 0;
+  const forceOpen = searchQuery.length > 0 || activeFilter !== "all" || activePhaseFilter !== "all";
+
+  PHASES_DATA.forEach(ph => {
+    if (activePhaseFilter !== "all" && String(ph.phase_num) !== String(activePhaseFilter)) return;
+    const filteredDays = ph.days.filter(dayMatchesFilter);
+    if (filteredDays.length === 0) return;
+
+    visibleDays += filteredDays.length;
+    const phDoneCount = ph.days.filter(d => appState.dayDone[String(d.d)]).length;
+    const isPhOpen = !!appState.openPhases[String(ph.phase_num)] || forceOpen;
+
+    html += '<div class="phase-card ' + (isPhOpen ? 'open' : '') + '" data-phase="' + ph.phase_num + '">';
+    html += '  <button type="button" class="phase-header-btn" data-action="toggle-phase" data-phase="' + ph.phase_num + '">';
+    html += '    <div class="phase-title-block">';
+    html += '      <h2 class="phase-title-text">' + escapeHtml(ph.title) + '</h2>';
+    html += '      <p class="phase-sub-text">' + escapeHtml(ph.subtitle) + '</p>';
+    html += '    </div>';
+    html += '    <div class="phase-meta-right">';
+    html += '      <span class="phase-badge ' + (phDoneCount === ph.days.length ? 'done' : '') + '">' + phDoneCount + '/' + ph.days.length + ' dias</span>';
+    html += '      <span style="font-size:0.78rem; color:var(--text-muted);">' + (isPhOpen ? '▾' : '▸') + '</span>';
+    html += '    </div>';
+    html += '  </button>';
+    html += '  <div class="phase-body">';
+
+    filteredDays.forEach(item => {
+      const k = String(item.d);
+      const isDone = !!appState.dayDone[k];
+      const dateVal = appState.dayDate[k] || "";
+      const gemVal = appState.dayGem[k] || "";
+      const hasGem = gemVal.trim().length > 0;
+      const isGemOpen = !!appState.openGems[k];
+
+      html += '<div class="day-row ' + (isDone ? 'done' : '') + '" id="day-row-' + k + '">';
+      html += '  <div class="day-main-line">';
+      html += '    <div class="day-left">';
+      html += '      <input type="checkbox" class="day-check" data-action="toggle-day" data-day="' + k + '" ' + (isDone ? 'checked' : '') + ' aria-label="Marcar Dia ' + k + ' como lido">';
+      html += '      <span class="day-num-badge">Dia ' + k + '</span>';
+      html += '      <div class="day-content-col">';
+      html += '        <div class="verse-pills-row">';
+      parseReadingPills(item.r).forEach(p => {
+        html += '<a href="' + escapeHtml(p.wolUrl) + '" target="_blank" rel="noopener noreferrer" class="verse-pill" title="Ler ' + escapeHtml(p.label) + ' na Bíblia On-line (WOL)">' + escapeHtml(p.label) + ' ↗</a>';
+      });
+      html += '        </div>';
+      html += '        <p class="day-focus-text">' + escapeHtml(item.f) + '</p>';
+      html += '      </div>';
+      html += '    </div>';
+      html += '    <div class="day-right">';
+      html += '      <label class="date-label-wrap">';
+      html += '        <span>Data:</span>';
+      html += '        <input type="date" class="day-date-input" data-action="change-date" data-day="' + k + '" value="' + escapeHtml(dateVal) + '" aria-label="Data de conclusão do Dia ' + k + '">';
+      html += '      </label>';
+      html += '      <button type="button" class="gem-toggle-btn ' + (hasGem ? 'has-gem' : '') + '" data-action="toggle-gem" data-day="' + k + '" title="Anotar gema espiritual do Dia ' + k + '">💎 ' + (hasGem ? 'Nota' : '+') + '</button>';
+      html += '    </div>';
+      html += '  </div>';
+      html += '  <div class="day-gem-drawer ' + (isGemOpen ? 'open' : '') + '" id="gem-drawer-' + k + '">';
+      html += '    <textarea class="gem-input" data-action="input-gem" data-day="' + k + '" placeholder="Anote aqui uma gema espiritual ou ponto de meditação do Dia ' + k + '...">' + escapeHtml(gemVal) + '</textarea>';
+      html += '  </div>';
+      html += '</div>';
+    });
+
+    html += '  </div>';
+    html += '</div>';
+  });
+
+  if (visibleDays === 0) {
+    html = '<div class="panel-card"><p style="margin:0; text-align:center; color:var(--text-sec);">Nenhum dia encontrado para este filtro.</p></div>';
+  }
+  mount.innerHTML = html;
+}
+
+function renderHistoryView() {
+  const mount = document.getElementById("history-mount");
+  if (!mount) return;
+
+  let entries = [];
+  PHASES_DATA.forEach(ph => {
+    ph.days.forEach(item => {
+      const k = String(item.d);
+      const isDone = !!appState.dayDone[k];
+      const dateVal = appState.dayDate[k] || "";
+      const gemVal = (appState.dayGem[k] || "").trim();
+      if (isDone || gemVal) {
+        entries.push({ phTitle: ph.title, day: item.d, reading: item.r, focus: item.f, isDone, dateVal, gemVal });
+      }
+    });
+  });
+
+  if (entries.length === 0) {
+    mount.innerHTML = '<p style="font-size:0.83rem; color:var(--text-muted);">Nenhum dia concluído ou gema anotada ainda. Ao marcar seus dias de leitura, eles aparecerão registrados aqui.</p>';
+    return;
+  }
+
+  let html = "";
+  entries.forEach(e => {
+    html += '<div class="history-entry">';
+    html += '  <div class="history-meta">';
+    html += '    <strong>Dia ' + e.day + ' • ' + escapeHtml(e.reading) + '</strong>';
+    html += '    <span>' + (e.dateVal ? '✓ Concluído em ' + escapeHtml(formatIsoToBr(e.dateVal)) : (e.isDone ? '✓ Concluído' : 'Em aberto')) + '</span>';
+    html += '  </div>';
+    html += '  <div style="font-size:0.8rem; color:var(--text-sec);">' + escapeHtml(e.focus) + '</div>';
+    if (e.gemVal) {
+      html += '  <div style="margin-top:6px; font-size:0.82rem; background:var(--bg-surface); padding:7px 10px; border-radius:6px; border:1px solid var(--border); white-space:pre-wrap;">💎 ' + escapeHtml(e.gemVal) + '</div>';
+    }
+    html += '</div>';
+  });
+  mount.innerHTML = html;
+}
+
+function populatePhaseSelect() {
+  const sel = document.getElementById("phase-select");
+  PHASES_DATA.forEach(ph => {
+    const opt = document.createElement("option");
+    opt.value = String(ph.phase_num);
+    opt.textContent = ph.title + " (Dias " + ph.start_day + "–" + ph.end_day + ")";
+    sel.appendChild(opt);
+  });
+}
+
+function buildExportReport(asMarkdown) {
+  const lines = [];
+  lines.push(asMarkdown ? "# Diário de Leitura — A Bíblia Cronológica em 365 Dias (12 Fases)" : "DIÁRIO DE LEITURA — A BÍBLIA CRONOLÓGICA EM 365 DIAS (12 FASES)");
+  lines.push("Exportado em: " + new Date().toLocaleString("pt-BR"));
+  lines.push("");
+
+  PHASES_DATA.forEach(ph => {
+    let phLines = [];
+    ph.days.forEach(item => {
+      const k = String(item.d);
+      const isDone = !!appState.dayDone[k];
+      const dt = appState.dayDate[k] ? formatIsoToBr(appState.dayDate[k]) : "";
+      const gem = (appState.dayGem[k] || "").trim();
+      if (isDone || gem) {
+        const statusStr = isDone ? ("[CONCLUÍDO" + (dt ? " EM " + dt : "") + "]") : "[PENDENTE]";
+        phLines.push("- Dia " + item.d + " (" + item.r + "): " + item.f + " " + statusStr);
+        if (gem) {
+          phLines.push("  Gema espiritual: " + gem);
+        }
+      }
+    });
+    if (phLines.length > 0) {
+      lines.push((asMarkdown ? "## " : "=== ") + ph.title);
+      lines.push(...phLines);
+      lines.push("");
+    }
+  });
+
+  if (lines.length <= 4) {
+    lines.push("Nenhum dia foi marcado como concluído ainda.");
+  }
+  return lines.join("\n");
+}
+
+function downloadFile(filename, content, mimeType) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 150);
+}
+
+function registerOfflineServiceWorker() {
+  try {
+    if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+      const swCode = "self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('activate', e => e.waitUntil(self.clients.claim())); self.addEventListener('fetch', e => { e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))); });";
+      const blob = new Blob([swCode], { type: "application/javascript" });
+      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+    }
+  } catch (e) {}
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadState();
+  applyVisualPrefs();
+  populatePhaseSelect();
+  computeTotalsAndRenderSpotlight();
+  renderPhases();
+  renderHistoryView();
+  registerOfflineServiceWorker();
+
+  document.getElementById("btn-theme-toggle").addEventListener("click", () => {
+    appState.theme = appState.theme === "dark" ? "light" : "dark";
+    applyVisualPrefs();
+    saveState();
+  });
+
+  document.getElementById("btn-font-inc").addEventListener("click", () => {
+    appState.fontScale = Math.min(1.25, Math.round(((appState.fontScale || 1) + 0.06) * 100) / 100);
+    applyVisualPrefs();
+    saveState();
+  });
+
+  document.getElementById("btn-font-dec").addEventListener("click", () => {
+    appState.fontScale = Math.max(0.86, Math.round(((appState.fontScale || 1) - 0.06) * 100) / 100);
+    applyVisualPrefs();
+    saveState();
+  });
+
+  document.getElementById("search-input").addEventListener("input", (e) => {
+    searchQuery = e.target.value.trim();
+    renderPhases();
+  });
+
+  document.getElementById("phase-select").addEventListener("change", (e) => {
+    activePhaseFilter = e.target.value;
+    renderPhases();
+  });
+
+  document.querySelectorAll(".chip-btn[data-filter]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".chip-btn[data-filter]").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeFilter = btn.getAttribute("data-filter");
+      renderPhases();
+    });
+  });
+
+  document.getElementById("btn-expand-all").addEventListener("click", () => {
+    PHASES_DATA.forEach(ph => { appState.openPhases[String(ph.phase_num)] = true; });
+    saveState();
+    renderPhases();
+  });
+
+  document.getElementById("btn-collapse-all").addEventListener("click", () => {
+    appState.openPhases = {};
+    saveState();
+    renderPhases();
+  });
+
+  // Spotlight completion button
+  document.getElementById("next-reading-mount").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-action='complete-spot-day']");
+    if (btn) {
+      const k = String(btn.getAttribute("data-day"));
+      const dateInput = document.getElementById("spot-date-input");
+      const chosenDate = (dateInput && dateInput.value) ? dateInput.value : getTodayIso();
+      appState.dayDone[k] = true;
+      appState.dayDate[k] = chosenDate;
+      // Also make sure the phase of the next day is open
+      const nextDayNum = Math.min(365, parseInt(k, 10) + 1);
+      PHASES_DATA.forEach(ph => {
+        if (nextDayNum >= ph.start_day && nextDayNum <= ph.end_day) {
+          appState.openPhases[String(ph.phase_num)] = true;
+        }
+      });
+      saveState();
+      computeTotalsAndRenderSpotlight();
+      renderPhases();
+      renderHistoryView();
+      showToast("✓ Dia " + k + " concluído (" + formatIsoToBr(chosenDate) + ")!");
+    }
+  });
+
+  // Delegated events inside phases-mount
+  document.getElementById("phases-mount").addEventListener("click", (e) => {
+    const phBtn = e.target.closest("[data-action='toggle-phase']");
+    if (phBtn) {
+      const pNum = String(phBtn.getAttribute("data-phase"));
+      appState.openPhases[pNum] = !appState.openPhases[pNum];
+      saveState();
+      renderPhases();
+      return;
+    }
+
+    const gemBtn = e.target.closest("[data-action='toggle-gem']");
+    if (gemBtn) {
+      const k = String(gemBtn.getAttribute("data-day"));
+      appState.openGems[k] = !appState.openGems[k];
+      const drawer = document.getElementById("gem-drawer-" + k);
+      if (drawer) drawer.classList.toggle("open", !!appState.openGems[k]);
+      saveState();
+      return;
+    }
+  });
+
+  document.getElementById("phases-mount").addEventListener("change", (e) => {
+    const t = e.target;
+    const action = t.getAttribute("data-action");
+    if (action === "toggle-day") {
+      const k = String(t.getAttribute("data-day"));
+      appState.dayDone[k] = t.checked;
+      if (t.checked && !appState.dayDate[k]) {
+        appState.dayDate[k] = getTodayIso();
+      }
+      saveState();
+      computeTotalsAndRenderSpotlight();
+      renderPhases();
+      renderHistoryView();
+      showToast(t.checked ? ("✓ Dia " + k + " concluído!") : ("Dia " + k + " desmarcado"));
+    } else if (action === "change-date") {
+      const k = String(t.getAttribute("data-day"));
+      appState.dayDate[k] = t.value;
+      if (t.value && !appState.dayDone[k]) {
+        appState.dayDone[k] = true;
+      }
+      saveState();
+      computeTotalsAndRenderSpotlight();
+      renderPhases();
+      renderHistoryView();
+      if (t.value) showToast("📅 Data do Dia " + k + " salva: " + formatIsoToBr(t.value));
+    }
+  });
+
+  document.getElementById("phases-mount").addEventListener("input", (e) => {
+    const t = e.target;
+    if (t.getAttribute("data-action") === "input-gem") {
+      const k = String(t.getAttribute("data-day"));
+      appState.dayGem[k] = t.value;
+      saveState();
+    }
+  });
+
+  // Bottom Navigation Tabs
+  document.querySelectorAll(".nav-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".nav-tab").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".view-section").forEach(v => v.classList.remove("active"));
+      tab.classList.add("active");
+      const targetId = tab.getAttribute("data-view");
+      const viewEl = document.getElementById(targetId);
+      if (viewEl) viewEl.classList.add("active");
+      if (targetId === "view-historico") renderHistoryView();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+
+  // Exports & Backups
+  document.getElementById("btn-export-txt").addEventListener("click", () => {
+    downloadFile("Diario_Biblia_Cronologica_365.txt", buildExportReport(false), "text/plain;charset=utf-8");
+    showToast("📥 Relatório .TXT baixado!");
+  });
+
+  document.getElementById("btn-export-md").addEventListener("click", () => {
+    downloadFile("Diario_Biblia_Cronologica_365.md", buildExportReport(true), "text/markdown;charset=utf-8");
+    showToast("📄 Diário .MD baixado!");
+  });
+
+  document.getElementById("btn-backup-json").addEventListener("click", () => {
+    downloadFile("Backup_Biblia_Cronologica_365.json", JSON.stringify(appState, null, 2), "application/json;charset=utf-8");
+    showToast("📦 Backup JSON baixado!");
+  });
+
+  document.getElementById("input-restore-json").addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const imported = JSON.parse(String(ev.target.result || "{}"));
+        appState = Object.assign(createDefaultState(), imported);
+        applyVisualPrefs();
+        saveState();
+        computeTotalsAndRenderSpotlight();
+        renderPhases();
+        renderHistoryView();
+        showToast("✓ Backup restaurado com sucesso!");
+      } catch (err) {
+        showToast("Arquivo JSON inválido.");
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById("btn-reset-all").addEventListener("click", () => {
+    openConfirmModal(
+      "Reiniciar Plano de Leitura",
+      "Deseja realmente apagar todas as marcações e datas concluídas deste aparelho?",
+      () => {
+        appState = createDefaultState();
+        saveState();
+        applyVisualPrefs();
+        computeTotalsAndRenderSpotlight();
+        renderPhases();
+        renderHistoryView();
+        showToast("Plano de leitura reiniciado.");
+      }
+    );
+  });
+
+  document.getElementById("modal-cancel-btn").addEventListener("click", closeConfirmModal);
+  document.getElementById("modal-confirm-btn").addEventListener("click", () => {
+    if (typeof pendingModalAction === "function") pendingModalAction();
+    closeConfirmModal();
+  });
+});
+</script>
+</body>
+</html>
